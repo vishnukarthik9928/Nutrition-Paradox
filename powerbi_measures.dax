@@ -1,0 +1,62 @@
+-- GLOBAL
+Average Obesity = AVERAGE(obesity_data[Mean_Estimate])
+Average Malnutrition = AVERAGE(malnutrition_data[Mean_Estimate])
+
+Global Avg Obesity Per Year =
+AVERAGEX(VALUES(obesity_data[Year]), CALCULATE([Average Obesity]))
+
+Global Avg Malnutrition Per Year =
+AVERAGEX(VALUES(malnutrition_data[Year]), CALCULATE([Average Malnutrition]))
+
+
+-- OBESITY MEASURES
+Obesity 2022 by Region =
+CALCULATE([Average Obesity], obesity_data[Year] = 2022)
+
+Average Obesity By Gender =
+AVERAGEX(VALUES(obesity_data[Gender]), CALCULATE([Average Obesity]))
+
+Average Obesity By Age Group =
+AVERAGEX(VALUES(obesity_data[Age_Group]), CALCULATE([Average Obesity]))
+
+Obesity India Trend =
+CALCULATE([Average Obesity], obesity_data[Country]="India")
+
+Least Reliable Countries =
+TOPN(5, SUMMARIZE(obesity_data, obesity_data[Country], "AvgCI", AVERAGE(obesity_data[CI_Width])), [AvgCI], DESC)
+
+Most Reliable Countries =
+TOPN(5, SUMMARIZE(obesity_data, obesity_data[Country], "AvgCI", AVERAGE(obesity_data[CI_Width])), [AvgCI], ASC)
+
+Female Higher Than Male =
+VAR FemaleOb = CALCULATE([Average Obesity], obesity_data[Gender]="Female")
+VAR MaleOb   = CALCULATE([Average Obesity], obesity_data[Gender]="Male")
+RETURN IF(FemaleOb - MaleOb > 5, FemaleOb - MaleOb)
+
+
+-- MALNUTRITION MEASURES
+Average Malnutrition By Gender =
+AVERAGEX(VALUES(malnutrition_data[Gender]), CALCULATE([Average Malnutrition]))
+
+Malnutrition Africa Trend =
+CALCULATE([Average Malnutrition], malnutrition_data[Region]="Africa")
+
+Regions Lowest Malnutrition =
+TOPN(5, SUMMARIZE(malnutrition_data, malnutrition_data[Region], "AvgMal", [Average Malnutrition]), [AvgMal], ASC)
+
+Increasing Malnutrition =
+VAR diff = MAX(malnutrition_data[Mean_Estimate]) - MIN(malnutrition_data[Mean_Estimate])
+RETURN IF(diff > 0, diff)
+
+CI High Flag =
+IF(MAX(malnutrition_data[CI_Width]) > 5, "High", "OK")
+
+
+-- COMBINED
+Obesity vs Malnutrition =
+[Aaverage Obesity] - [Average Malnutrition]
+
+Obesity Up & Malnutrition Down =
+VAR ob = MAX(obesity_data[Mean_Estimate]) - MIN(obesity_data[Mean_Estimate])
+VAR mal = MAX(malnutrition_data[Mean_Estimate]) - MIN(malnutrition_data[Mean_Estimate])
+RETURN IF(ob > 0 && mal < 0, 1, 0)
