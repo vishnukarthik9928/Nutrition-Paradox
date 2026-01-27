@@ -31,7 +31,7 @@ This project implements a full analytical pipeline to uncover insights such as:
 | Database | TiDB / MySQL |
 | Data Processing | pandas, numpy, pycountry |
 | Visualization | seaborn, matplotlib |
-| Dashboard *(planned)* | Streamlit |
+| Dashboard | Streamlit |
 
 ---
 
